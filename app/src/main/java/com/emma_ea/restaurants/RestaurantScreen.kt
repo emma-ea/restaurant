@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
 
@@ -36,10 +37,11 @@ fun RestaurantScreen() {
 //        }
 //    }
 
-    
+    val vm = viewModel<RestaurantViewModel>()
+
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         item { Text(text = "Restaurants Available") }
-        items(dummyRestaurants) { restaurant ->
+        items(vm.getRestaurants()) { restaurant ->
             RestaurantItem(item = restaurant)
         }
     }
