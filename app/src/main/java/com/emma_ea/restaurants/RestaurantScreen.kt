@@ -34,25 +34,13 @@ fun RestaurantPreview() {
 
 @Composable
 fun RestaurantScreen() {
-//    Column(Modifier.verticalScroll(rememberScrollState())) {
-//        dummyRestaurants.forEach {
-//            RestaurantItem(item = it)
-//        }
-//    }
-
     val vm = viewModel<RestaurantViewModel>()
-    val state: MutableState<List<Restaurant>> =
-        rememberSaveable { mutableStateOf(vm.getRestaurants()) }
 
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         item { Text(text = "Restaurants Available") }
-        items(state.value) { restaurant ->
+        items(vm.state.value) { restaurant ->
             RestaurantItem(item = restaurant) { id ->
-                val restaurants = state.value.toMutableList()
-                val itemIndex = restaurants.indexOfFirst { it.id == id }
-                val item = restaurants[itemIndex]
-                restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
-                state.value = restaurants
+                vm.toggleFavorite(id)
             }
         }
     }
