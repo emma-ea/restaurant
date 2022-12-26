@@ -35,6 +35,7 @@ fun RestaurantPreview() {
 @Composable
 fun RestaurantScreen() {
     val vm = viewModel<RestaurantViewModel>()
+    vm.getRestaurants()
 
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         item { Text(text = "Restaurants Available") }

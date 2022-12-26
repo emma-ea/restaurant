@@ -3,13 +3,29 @@ package com.emma_ea.restaurants
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
-    fun getRestaurants() = dummyRestaurants
 
-    val state = mutableStateOf(
-        dummyRestaurants.restoreSelections()
-    )
+    val state = mutableStateOf(emptyList<Restaurant>())
+
+    private var restInterface: RestaurantApiService
+
+    init {
+        val retrofit: Retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://wonder-words-9f366-default-rtdb.firebaseio.com/")
+            .build()
+        restInterface = retrofit.create(RestaurantApiService::class.java)
+    }
+
+    fun getRestaurants() {
+        restInterface.getRestaurants().execute().body()
+            ?.let { restaurants ->
+                state.value = restaurants.restoreSelections()
+            }
+    }
 
     fun toggleFavorite(id: Int) {
         val restaurants = state.value.toMutableList()
