@@ -36,10 +36,6 @@ fun RestaurantPreview() {
 fun RestaurantScreen() {
     val vm = viewModel<RestaurantViewModel>()
 
-    LaunchedEffect(key1 = "request_restaurants") {
-        vm.getRestaurants()
-    }
-
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         item { Text(text = "Restaurants Available") }
         items(vm.state.value) { restaurant ->

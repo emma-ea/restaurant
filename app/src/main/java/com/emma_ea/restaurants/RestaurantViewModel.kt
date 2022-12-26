@@ -23,9 +23,11 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             .baseUrl("https://wonder-words-9f366-default-rtdb.firebaseio.com/")
             .build()
         restInterface = retrofit.create(RestaurantApiService::class.java)
+
+        getRestaurants()
     }
 
-    fun getRestaurants() {
+    private fun getRestaurants() {
         restaurantsCall = restInterface.getRestaurants()
         restaurantsCall.enqueue(
             object : Callback<List<Restaurant>> {
