@@ -15,6 +15,8 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
 
     private var restInterface: RestaurantApiService
 
+    private lateinit var restaurantsCall: Call<List<Restaurant>>
+
     init {
         val retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
@@ -24,7 +26,8 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
     }
 
     fun getRestaurants() {
-        restInterface.getRestaurants().enqueue(
+        restaurantsCall = restInterface.getRestaurants()
+        restaurantsCall.enqueue(
             object : Callback<List<Restaurant>> {
                 override fun onResponse(
                     call: Call<List<Restaurant>>,
@@ -77,5 +80,10 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
 
     companion object {
         const val FAVORITES = "favorites"
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        restaurantsCall.cancel()
     }
 }
