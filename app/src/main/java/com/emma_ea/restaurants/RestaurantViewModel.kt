@@ -3,6 +3,7 @@ package com.emma_ea.restaurants
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -12,10 +13,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
 
     val state = mutableStateOf(emptyList<Restaurant>())
+    val job = Job()
+    private val scope = CoroutineScope(job + Dispatchers.IO)
 
     private var restInterface: RestaurantApiService
-
-    private lateinit var restaurantsCall: Call<List<Restaurant>>
 
     init {
         val retrofit: Retrofit = Retrofit.Builder()
@@ -28,24 +29,12 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
     }
 
     private fun getRestaurants() {
-        restaurantsCall = restInterface.getRestaurants()
-        restaurantsCall.enqueue(
-            object : Callback<List<Restaurant>> {
-                override fun onResponse(
-                    call: Call<List<Restaurant>>,
-                    response: Response<List<Restaurant>>
-                ) {
-                    response.body()?.let {
-                        state.value = it.restoreSelections()
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Restaurant>>, t: Throwable) {
-                    t.printStackTrace()
-                }
-
+        scope.launch {
+            val restaurants = restInterface.getRestaurants()
+            withContext(Dispatchers.Main) {
+                state.value = restaurants.restoreSelections()
             }
-        )
+        }
     }
 
     fun toggleFavorite(id: Int) {
@@ -86,6 +75,6 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
 
     override fun onCleared() {
         super.onCleared()
-        restaurantsCall.cancel()
+        job.cancel()
     }
 }
