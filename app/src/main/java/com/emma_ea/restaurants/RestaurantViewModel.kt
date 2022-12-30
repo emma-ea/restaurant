@@ -1,9 +1,15 @@
 package com.emma_ea.restaurants
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -12,11 +18,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
 
-    val state = mutableStateOf(emptyList<Restaurant>())
-    val job = Job()
-    private val scope = CoroutineScope(job + Dispatchers.IO)
+    private val _state = mutableStateOf(RestaurantViewState())
+    val state: State<RestaurantViewState> = _state
 
     private var restInterface: RestaurantApiService
+
+    private val errorHandler = CoroutineExceptionHandler { _, e ->
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                _state.value = RestaurantViewState(error = e.message ?: "Something went wrong")
+            }
+        }
+        e.printStackTrace()
+    }
 
     init {
         val retrofit: Retrofit = Retrofit.Builder()
@@ -28,22 +42,29 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
         getRestaurants()
     }
 
+    fun retry() {
+        getRestaurants()
+    }
+
     private fun getRestaurants() {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            withContext(Dispatchers.Main) {
+                _state.value = RestaurantViewState(loading = true)
+            }
             val restaurants = restInterface.getRestaurants()
             withContext(Dispatchers.Main) {
-                state.value = restaurants.restoreSelections()
+                _state.value = RestaurantViewState(data = restaurants.restoreSelections())
             }
         }
     }
 
     fun toggleFavorite(id: Int) {
-        val restaurants = state.value.toMutableList()
+        val restaurants = _state.value.data.toMutableList()
         val itemIndex = restaurants.indexOfFirst { it.id == id }
         val item = restaurants[itemIndex]
         restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
         storeSelection(restaurants[itemIndex])
-        state.value = restaurants
+        _state.value =  RestaurantViewState(data = restaurants)
     }
 
     private fun storeSelection(item: Restaurant) {
@@ -73,8 +94,4 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
         const val FAVORITES = "favorites"
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        job.cancel()
-    }
 }
