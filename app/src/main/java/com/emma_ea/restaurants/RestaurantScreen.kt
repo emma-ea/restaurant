@@ -2,10 +2,7 @@ package com.emma_ea.restaurants
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -35,15 +32,36 @@ fun RestaurantPreview() {
 @Composable
 fun RestaurantScreen() {
     val vm = viewModel<RestaurantViewModel>()
+    val state = vm.state.value
 
-    LazyColumn(contentPadding = PaddingValues(8.dp)) {
-        item { Text(text = "Restaurants Available") }
-        items(vm.state.value) { restaurant ->
-            RestaurantItem(item = restaurant) { id ->
-                vm.toggleFavorite(id)
+    if (state.loading) {
+        Box {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+
+    if (state.error.isNotEmpty()) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(state.error)
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(onClick = { vm.retry() }) {
+                Text("Retry")
+            }
+        }
+    } else {
+        LazyColumn(contentPadding = PaddingValues(8.dp)) {
+            item { Text(text = "Restaurants Available") }
+            items(state.data) { restaurant ->
+                RestaurantItem(item = restaurant) { id ->
+                    vm.toggleFavorite(id)
+                }
             }
         }
     }
+
 }
 
 @Composable
