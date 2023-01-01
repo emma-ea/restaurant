@@ -86,7 +86,7 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
 }
 
 @Composable
-fun RestaurantIcon(icon: ImageVector, modifier: Modifier, onClick: () -> Unit = { }) {
+public fun RestaurantIcon(icon: ImageVector, modifier: Modifier, onClick: () -> Unit = { }) {
     Image(
         imageVector = icon,
         contentDescription = "Restaurant Icon",
@@ -97,8 +97,16 @@ fun RestaurantIcon(icon: ImageVector, modifier: Modifier, onClick: () -> Unit = 
 }
 
 @Composable
-fun RestaurantDetails(title: String, description: String, modifier: Modifier) {
-    Column(modifier = modifier) {
+public fun RestaurantDetails(
+    title: String,
+    description: String,
+    modifier: Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment
+    ) {
         Text(text = title, style = MaterialTheme.typography.h6)
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
