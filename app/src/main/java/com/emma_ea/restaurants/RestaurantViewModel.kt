@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.net.ConnectException
 import java.net.UnknownHostException
 
-class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
+class RestaurantViewModel() : ViewModel() {
 
     private val _state = mutableStateOf(RestaurantViewState())
     val state: State<RestaurantViewState> = _state
@@ -31,7 +31,7 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
                         is HttpException -> {
                         restaurantsDao.getAll().let { cache ->
                             if (cache.isNotEmpty()) _state.value = RestaurantViewState(data = cache)
-                            else _state.value = RestaurantViewState(error = "Couldn't find cache. Connect to the internet")
+                            else _state.value = RestaurantViewState(error = "Couldn't find data. Connect to the internet")
                         }
                         }
                     else -> _state.value = RestaurantViewState(error = e.message ?: "Something went wrong")
@@ -48,14 +48,10 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             .build()
         restInterface = retrofit.create(RestaurantApiService::class.java)
 
-//        viewModelScope.launch(errorHandler) {
-//        }
         getRestaurants()
     }
 
     fun retry() {
-//        viewModelScope.launch(errorHandler) {
-//        }
         getRestaurants()
     }
 
@@ -73,30 +69,15 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             }
             refreshCache()
             withContext(Dispatchers.Main) {
-                _state.value = RestaurantViewState(data = restaurantsDao.getAll() /*restaurants.restoreSelections()*/)
+                _state.value = RestaurantViewState(data = restaurantsDao.getAll())
             }
         }
     }
 
-//    private suspend fun getRestaurants(): List<Restaurant> {
-//        return withContext(Dispatchers.Main) {
-//            _state.value = RestaurantViewState(loading = true)
-//            val restaurants = restInterface.getRestaurants()
-//            _state.value = RestaurantViewState(data = restaurants.restoreSelections())
-//            restaurantsDao.addAll(restaurants)
-//            return@withContext restaurants
-//        }
-//    }
 
-    fun toggleFavorite(id: Int) {
-        val restaurants = _state.value.data.toMutableList()
-        val itemIndex = restaurants.indexOfFirst { it.id == id }
-        val item = restaurants[itemIndex]
-        restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
-        storeSelection(restaurants[itemIndex])
-        // _state.value =  RestaurantViewState(data = restaurants)
+    fun toggleFavorite(id: Int, oldValue: Boolean) {
         viewModelScope.launch(errorHandler) {
-            val updatedRestaurants = toggleFavoriteRestaurant(id, item.isFavorite)
+            val updatedRestaurants = toggleFavoriteRestaurant(id, oldValue)
             _state.value = RestaurantViewState(data = updatedRestaurants)
         }
     }
@@ -109,33 +90,6 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             restaurantsDao.getAll()
         }
 
-    private fun storeSelection(item: Restaurant) {
-        val savedToggled = stateHandle
-            .get<List<Int>?>(FAVORITES)
-            .orEmpty()
-            .toMutableList()
-        if (item.isFavorite)
-            savedToggled.add(item.id)
-        else
-            savedToggled.remove(item.id)
-        stateHandle[FAVORITES] = savedToggled
-    }
 
-    private fun List<Restaurant>.restoreSelections(): List<Restaurant> {
-        stateHandle.get<List<Int>?>(FAVORITES)?.let { selectedIds ->
-            val restaurantsMap = this.associateBy { it.id }
-                .toMutableMap()
-            selectedIds.forEach { id ->
-                val restaurant = restaurantsMap[id] ?: return@forEach
-                restaurantsMap[id] = restaurant.copy(isFavorite = true)
-            }
-            return restaurantsMap.values.toList()
-        }
-        return this
-    }
-
-    companion object {
-        const val FAVORITES = "favorites"
-    }
 
 }
