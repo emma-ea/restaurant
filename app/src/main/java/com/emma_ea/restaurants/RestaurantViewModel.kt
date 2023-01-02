@@ -59,15 +59,21 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
         getRestaurants()
     }
 
+    private suspend fun refreshCache() {
+        val remoteRestaurants = restInterface.getRestaurants()
+        val favoriteRestaurants = restaurantsDao.getAllFavorited()
+        restaurantsDao.addAll(remoteRestaurants)
+        restaurantsDao.updateAll(favoriteRestaurants.map { PartialRestaurant(it.id, true) })
+    }
+
     private fun getRestaurants() {
         viewModelScope.launch(Dispatchers.IO + errorHandler) {
             withContext(Dispatchers.Main) {
                 _state.value = RestaurantViewState(loading = true)
             }
-            val restaurants = restInterface.getRestaurants()
-            restaurantsDao.addAll(restaurants)
+            refreshCache()
             withContext(Dispatchers.Main) {
-                _state.value = RestaurantViewState(data = restaurants.restoreSelections())
+                _state.value = RestaurantViewState(data = restaurantsDao.getAll() /*restaurants.restoreSelections()*/)
             }
         }
     }
@@ -88,9 +94,10 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
         val item = restaurants[itemIndex]
         restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
         storeSelection(restaurants[itemIndex])
-        _state.value =  RestaurantViewState(data = restaurants)
-        viewModelScope.launch {
-            toggleFavoriteRestaurant(id, item.isFavorite)
+        // _state.value =  RestaurantViewState(data = restaurants)
+        viewModelScope.launch(errorHandler) {
+            val updatedRestaurants = toggleFavoriteRestaurant(id, item.isFavorite)
+            _state.value = RestaurantViewState(data = updatedRestaurants)
         }
     }
 
@@ -99,6 +106,7 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             restaurantsDao.update(
                 PartialRestaurant(id = id, isFavorite = !oldValue)
             )
+            restaurantsDao.getAll()
         }
 
     private fun storeSelection(item: Restaurant) {
