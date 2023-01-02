@@ -25,12 +25,12 @@ import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 @Composable
 fun RestaurantPreview() {
     RestaurantsTheme {
-        RestaurantScreen()
+        //RestaurantScreen()
     }
 }
 
 @Composable
-fun RestaurantScreen() {
+fun RestaurantScreen(onItemClick: (id: Int) -> Unit) {
     val vm = viewModel<RestaurantViewModel>()
     val state = vm.state.value
 
@@ -55,9 +55,11 @@ fun RestaurantScreen() {
         LazyColumn(contentPadding = PaddingValues(8.dp)) {
             item { Text(text = "Restaurants Available") }
             items(state.data) { restaurant ->
-                RestaurantItem(item = restaurant) { id ->
-                    vm.toggleFavorite(id)
-                }
+                RestaurantItem(
+                    item = restaurant,
+                    onFavoriteClick =  { id -> vm.toggleFavorite(id) },
+                    onItemClick = {id -> onItemClick(id) }
+                )
             }
         }
     }
@@ -65,13 +67,22 @@ fun RestaurantScreen() {
 }
 
 @Composable
-fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
+fun RestaurantItem(
+    item: Restaurant,
+    onFavoriteClick: (id: Int) -> Unit,
+    onItemClick: (id: Int) -> Unit
+) {
     val icon = if (item.isFavorite)
         Icons.Filled.Favorite
     else
         Icons.Filled.FavoriteBorder
 
-    Card(elevation = 4.dp, modifier = Modifier.padding(8.dp)) {
+    Card(
+        elevation = 4.dp,
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onItemClick(item.id) }
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
@@ -79,7 +90,7 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
             RestaurantIcon(Icons.Filled.Place, Modifier.weight(0.15f))
             RestaurantDetails(item.title, item.description, Modifier.weight(0.7f))
             RestaurantIcon(icon, Modifier.weight(0.15f)) {
-                onClick(item.id)
+                onFavoriteClick(item.id)
             }
         }
     }

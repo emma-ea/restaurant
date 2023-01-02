@@ -1,6 +1,7 @@
 package com.emma_ea.restaurants
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +10,9 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RestaurantDetailViewModel()  : ViewModel() {
+class RestaurantDetailViewModel(
+    private val stateHandler: SavedStateHandle
+)  : ViewModel() {
 
     private var restInteface: RestaurantApiService
     val state = mutableStateOf<Restaurant?>(null)
@@ -22,8 +25,10 @@ class RestaurantDetailViewModel()  : ViewModel() {
 
         restInteface = retrofit.create(RestaurantApiService::class.java)
 
+        val id = stateHandler.get<Int>("restaurant_id") ?: 0
+
         viewModelScope.launch {
-            val restaurant = getRemoteRestaurant(2)
+            val restaurant = getRemoteRestaurant(id)
             state.value = restaurant
         }
     }

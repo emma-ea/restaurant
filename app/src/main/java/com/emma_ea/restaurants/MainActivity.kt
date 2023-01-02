@@ -10,6 +10,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,9 +28,30 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 //                    Greeting("Android")
-                    RestaurantScreen()
+                    RestaurantApp()
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RestaurantApp() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "restaurants") {
+        composable(route = "restaurants") {
+            RestaurantScreen { id ->
+                navController.navigate("restaurant/$id")
+            }
+        }
+        composable(
+            route = "restaurants/{restaurant_id}",
+            arguments = listOf(navArgument("restaurant_id"){
+                type = NavType.IntType
+            })
+        ) { navStackEntry ->
+            val id = navStackEntry.arguments?.getInt("restaurant_id")
+            RestaurantDetailScreen()
         }
     }
 }
