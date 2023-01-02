@@ -48,39 +48,39 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
             .build()
         restInterface = retrofit.create(RestaurantApiService::class.java)
 
-        viewModelScope.launch(errorHandler) {
-            getRestaurants()
-        }
+//        viewModelScope.launch(errorHandler) {
+//        }
+        getRestaurants()
     }
 
     fun retry() {
-        viewModelScope.launch(errorHandler) {
-            getRestaurants()
+//        viewModelScope.launch(errorHandler) {
+//        }
+        getRestaurants()
+    }
+
+    private fun getRestaurants() {
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            withContext(Dispatchers.Main) {
+                _state.value = RestaurantViewState(loading = true)
+            }
+            val restaurants = restInterface.getRestaurants()
+            restaurantsDao.addAll(restaurants)
+            withContext(Dispatchers.Main) {
+                _state.value = RestaurantViewState(data = restaurants.restoreSelections())
+            }
         }
     }
 
-//    private fun getRestaurantsv() {
-//        viewModelScope.launch(Dispatchers.IO + errorHandler) {
-//            withContext(Dispatchers.Main) {
-//                _state.value = RestaurantViewState(loading = true)
-//            }
+//    private suspend fun getRestaurants(): List<Restaurant> {
+//        return withContext(Dispatchers.Main) {
+//            _state.value = RestaurantViewState(loading = true)
 //            val restaurants = restInterface.getRestaurants()
+//            _state.value = RestaurantViewState(data = restaurants.restoreSelections())
 //            restaurantsDao.addAll(restaurants)
-//            withContext(Dispatchers.Main) {
-//                _state.value = RestaurantViewState(data = restaurants.restoreSelections())
-//            }
+//            return@withContext restaurants
 //        }
 //    }
-
-    private suspend fun getRestaurants(): List<Restaurant> {
-        return withContext(Dispatchers.Main) {
-            _state.value = RestaurantViewState(loading = true)
-            val restaurants = restInterface.getRestaurants()
-            _state.value = RestaurantViewState(data = restaurants.restoreSelections())
-            restaurantsDao.addAll(restaurants)
-            return@withContext restaurants
-        }
-    }
 
     fun toggleFavorite(id: Int) {
         val restaurants = _state.value.data.toMutableList()
@@ -89,7 +89,17 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
         restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
         storeSelection(restaurants[itemIndex])
         _state.value =  RestaurantViewState(data = restaurants)
+        viewModelScope.launch {
+            toggleFavoriteRestaurant(id, item.isFavorite)
+        }
     }
+
+    private suspend fun toggleFavoriteRestaurant(id: Int, oldValue: Boolean) =
+        withContext(Dispatchers.IO) {
+            restaurantsDao.update(
+                PartialRestaurant(id = id, isFavorite = !oldValue)
+            )
+        }
 
     private fun storeSelection(item: Restaurant) {
         val savedToggled = stateHandle
@@ -106,8 +116,10 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
     private fun List<Restaurant>.restoreSelections(): List<Restaurant> {
         stateHandle.get<List<Int>?>(FAVORITES)?.let { selectedIds ->
             val restaurantsMap = this.associateBy { it.id }
+                .toMutableMap()
             selectedIds.forEach { id ->
-                restaurantsMap[id]?.isFavorite = true
+                val restaurant = restaurantsMap[id] ?: return@forEach
+                restaurantsMap[id] = restaurant.copy(isFavorite = true)
             }
             return restaurantsMap.values.toList()
         }
