@@ -41,7 +41,7 @@ private fun RestaurantApp() {
     NavHost(navController = navController, startDestination = "restaurants") {
         composable(route = "restaurants") {
             RestaurantScreen { id ->
-                navController.navigate("restaurant/$id")
+                navController.navigate("restaurants/$id")
             }
         }
         composable(
