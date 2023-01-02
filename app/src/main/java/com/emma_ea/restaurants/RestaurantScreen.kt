@@ -1,7 +1,9 @@
 package com.emma_ea.restaurants
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,13 +39,17 @@ fun RestaurantScreen(onItemClick: (id: Int) -> Unit) {
     val state = vm.state.value
 
     if (state.loading) {
-        Box {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
     }
 
     if (state.error.isNotEmpty()) {
         Column(
+            Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -103,7 +111,11 @@ public fun RestaurantIcon(icon: ImageVector, modifier: Modifier, onClick: () -> 
         contentDescription = "Restaurant Icon",
         modifier = modifier
             .padding(8.dp)
-            .clickable { onClick() }
+            .clickable { onClick() },
+        colorFilter = isSystemInDarkTheme().let { dark ->
+            if (dark) return@let ColorFilter.tint(Color.Red)
+            ColorFilter.tint(Color.Black)
+        }
     )
 }
 
