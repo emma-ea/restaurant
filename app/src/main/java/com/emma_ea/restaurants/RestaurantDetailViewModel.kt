@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +18,8 @@ class RestaurantDetailViewModel(
     private var restInteface: RestaurantApiService
     val state = mutableStateOf<Restaurant?>(null)
 
+    private val restaurantDao: RestaurantsDao
+
     init {
         val retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
@@ -24,6 +27,8 @@ class RestaurantDetailViewModel(
             .build()
 
         restInteface = retrofit.create(RestaurantApiService::class.java)
+
+        restaurantDao = RestaurantDatabase.getDaoIntance(RestaurantsApplication.getAppContext())
 
         val id = stateHandler.get<Int>("restaurant_id") ?: 0
 
@@ -33,10 +38,16 @@ class RestaurantDetailViewModel(
         }
     }
 
+    private val errorHandler = CoroutineExceptionHandler { _, e ->
+        e.printStackTrace()
+    }
+
     private suspend fun getRemoteRestaurant(id: Int): Restaurant {
         return withContext(Dispatchers.IO) {
-            val responseMap = restInteface.getRestaurant(id)
-            return@withContext responseMap.values.first()
+            val restaurant = restaurantDao.getRestaurantById(id)
+            restaurant
+//             val responseMap = restInteface.getRestaurant(id)
+//            return@withContext responseMap.values.first()
         }
     }
 

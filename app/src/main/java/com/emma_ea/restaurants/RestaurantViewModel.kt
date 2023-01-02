@@ -67,9 +67,11 @@ class RestaurantViewModel() : ViewModel() {
             withContext(Dispatchers.Main) {
                 _state.value = RestaurantViewState(loading = true)
             }
-            refreshCache()
+            val restaurants = restaurantsDao.getAll()
+            if (restaurants.isEmpty())
+                refreshCache()
             withContext(Dispatchers.Main) {
-                _state.value = RestaurantViewState(data = restaurantsDao.getAll())
+                _state.value = RestaurantViewState(data = restaurants)
             }
         }
     }
