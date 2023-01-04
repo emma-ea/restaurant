@@ -8,28 +8,24 @@ import kotlinx.coroutines.*
 
 class RestaurantViewModel() : ViewModel() {
 
-    private val _state = mutableStateOf(
-        RestaurantViewState(
-            data = emptyList(),
-            loading = true,
-        )
-    )
-
-    val state: State<RestaurantViewState> = _state
-
     private val repository = RestaurantRepository()
 
-    init {
-        getRestaurants()
-    }
+    private val _state = mutableStateOf(RestaurantViewState())
+
+    val state: State<RestaurantViewState> = _state
 
     private val errorHandler = CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
         _state.value = _state.value.copy(error = e.message ?: "Something went wrong", loading = false)
     }
 
+    init {
+        getRestaurants()
+    }
+
     private fun getRestaurants() {
         viewModelScope.launch(errorHandler) {
+            _state.value = _state.value.copy(loading = true)
             val restaurants = repository.getAllRestaurants()
             _state.value = _state.value.copy(loading = false, data = restaurants)
         }
