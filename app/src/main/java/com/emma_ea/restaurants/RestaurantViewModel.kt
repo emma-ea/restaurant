@@ -25,7 +25,7 @@ class RestaurantViewModel() : ViewModel() {
 
     private fun getRestaurants() {
         viewModelScope.launch(errorHandler) {
-            _state.value = _state.value.copy(loading = true)
+            _state.value = _state.value.copy(loading = true, error = "")
             val restaurants = repository.getAllRestaurants()
             _state.value = _state.value.copy(loading = false, data = restaurants)
         }
