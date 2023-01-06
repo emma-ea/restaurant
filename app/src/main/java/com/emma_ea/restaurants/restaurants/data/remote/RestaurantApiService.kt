@@ -1,6 +1,6 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.data.remote
 
-import retrofit2.Call
+import com.emma_ea.restaurants.restaurants.data.remote.RemoteRestaurant
 import retrofit2.http.GET
 import retrofit2.http.Query
 

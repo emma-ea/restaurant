@@ -1,14 +1,16 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.presentation.list
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emma_ea.restaurants.restaurants.data.RestaurantRepository
+import com.emma_ea.restaurants.restaurants.domain.GetInitialRestaurantsUseCase
+import com.emma_ea.restaurants.restaurants.domain.ToggleRestaurantUseCase
 import kotlinx.coroutines.*
 
 class RestaurantViewModel() : ViewModel() {
 
-    private val repository = RestaurantRepository()
     private val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase()
     private val getToggleRestaurantUseCase = ToggleRestaurantUseCase()
 

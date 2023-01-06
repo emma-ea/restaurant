@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.emma_ea.restaurants.restaurants.presentation.details.RestaurantDetailScreen
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantScreen
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
 class MainActivity : ComponentActivity() {

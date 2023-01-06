@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.data.remote
 
 import com.google.gson.annotations.SerializedName
 

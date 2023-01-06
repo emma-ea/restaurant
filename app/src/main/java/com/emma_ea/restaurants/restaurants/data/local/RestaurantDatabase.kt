@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.data.local
 
 import android.content.Context
 import androidx.room.Database
