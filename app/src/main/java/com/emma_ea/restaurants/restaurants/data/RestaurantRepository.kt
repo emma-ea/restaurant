@@ -1,5 +1,11 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.data
 
+import com.emma_ea.restaurants.restaurants.domain.Restaurant
+import com.emma_ea.restaurants.RestaurantsApplication
+import com.emma_ea.restaurants.restaurants.data.local.LocalRestaurant
+import com.emma_ea.restaurants.restaurants.data.local.PartialLocalRestaurant
+import com.emma_ea.restaurants.restaurants.data.local.RestaurantDatabase
+import com.emma_ea.restaurants.restaurants.data.remote.RestaurantApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException

@@ -1,22 +1,21 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.presentation.details
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emma_ea.restaurants.restaurants.data.RestaurantRepository
+import com.emma_ea.restaurants.restaurants.domain.GetRestaurantByIDUseCase
+import com.emma_ea.restaurants.restaurants.domain.Restaurant
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class RestaurantDetailViewModel(
     private val stateHandler: SavedStateHandle
 )  : ViewModel() {
 
-    private val repository = RestaurantRepository()
+    private val getRestaurantByIDUseCase = GetRestaurantByIDUseCase()
 
     val _state = mutableStateOf<Restaurant?>(null)
     val state: State<Restaurant?> = _state
@@ -35,7 +34,7 @@ class RestaurantDetailViewModel(
     }
 
     private suspend fun getRemoteRestaurant(id: Int): Restaurant {
-        return repository.getRestaurantById(id)
+        return getRestaurantByIDUseCase(id)
     }
 
 }

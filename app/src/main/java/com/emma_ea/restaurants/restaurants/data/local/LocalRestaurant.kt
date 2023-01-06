@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.data.local
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

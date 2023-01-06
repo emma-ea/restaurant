@@ -1,4 +1,6 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.domain
+
+import com.emma_ea.restaurants.restaurants.data.RestaurantRepository
 
 class GetSortedRestaurantsUseCase {
 

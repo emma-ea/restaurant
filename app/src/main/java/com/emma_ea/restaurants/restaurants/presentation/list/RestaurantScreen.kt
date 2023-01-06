@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.presentation.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.emma_ea.restaurants.restaurants.domain.Restaurant
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
 

@@ -1,4 +1,4 @@
-package com.emma_ea.restaurants
+package com.emma_ea.restaurants.restaurants.presentation.details
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantDetails
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantIcon
 
 @Composable
 fun RestaurantDetailScreen() {
