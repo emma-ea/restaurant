@@ -1,5 +1,6 @@
 package com.emma_ea.restaurants
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -15,40 +16,26 @@ class RestaurantDetailViewModel(
     private val stateHandler: SavedStateHandle
 )  : ViewModel() {
 
-    private var restInteface: RestaurantApiService
-    val state = mutableStateOf<Restaurant?>(null)
+    private val repository = RestaurantRepository()
 
-    private val restaurantDao: RestaurantsDao
-
-    init {
-        val retrofit: Retrofit = Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl("https://wonder-words-9f366-default-rtdb.firebaseio.com/")
-            .build()
-
-        restInteface = retrofit.create(RestaurantApiService::class.java)
-
-        restaurantDao = RestaurantDatabase.getDaoIntance(RestaurantsApplication.getAppContext())
-
-        val id = stateHandler.get<Int>("restaurant_id") ?: 0
-
-        viewModelScope.launch {
-            val restaurant = getRemoteRestaurant(id)
-            state.value = restaurant
-        }
-    }
+    val _state = mutableStateOf<Restaurant?>(null)
+    val state: State<Restaurant?> = _state
 
     private val errorHandler = CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
     }
 
-    private suspend fun getRemoteRestaurant(id: Int): Restaurant {
-        return withContext(Dispatchers.IO) {
-            val restaurant = restaurantDao.getRestaurantById(id)
-            restaurant
-//             val responseMap = restInteface.getRestaurant(id)
-//            return@withContext responseMap.values.first()
+    init {
+        val id = stateHandler.get<Int>("restaurant_id") ?: 0
+
+        viewModelScope.launch(errorHandler) {
+            val restaurant = getRemoteRestaurant(id)
+            _state.value = restaurant
         }
+    }
+
+    private suspend fun getRemoteRestaurant(id: Int): Restaurant {
+        return repository.getRestaurantById(id)
     }
 
 }

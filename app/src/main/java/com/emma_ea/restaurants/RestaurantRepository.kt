@@ -38,6 +38,16 @@ class RestaurantRepository {
         }
     }
 
+    suspend fun getRestaurantById(id: Int): Restaurant {
+        return withContext(Dispatchers.IO) {
+            try {
+                restaurantsDao.getRestaurantById(id)
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
     suspend fun toggleFavoriteRestaurant(id: Int, oldValue: Boolean) =
         withContext(Dispatchers.IO) {
             restaurantsDao.update(PartialRestaurant(id = id, isFavorite = !oldValue))
