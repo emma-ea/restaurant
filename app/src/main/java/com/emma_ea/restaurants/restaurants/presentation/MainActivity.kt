@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,7 +18,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.emma_ea.restaurants.restaurants.presentation.details.RestaurantDetailScreen
+import com.emma_ea.restaurants.restaurants.presentation.details.RestaurantDetailScreenState
+import com.emma_ea.restaurants.restaurants.presentation.details.RestaurantDetailViewModel
 import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantScreen
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantScreenState
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantViewModel
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +48,12 @@ private fun RestaurantApp() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "restaurants") {
         composable(route = "restaurants") {
-            RestaurantScreen { id ->
+            val viewModel: RestaurantViewModel = viewModel()
+            RestaurantScreen(
+                viewModel.state.value,
+                requestData =  { viewModel.retry() },
+                onFavoriteClick =  {id, oldValue -> viewModel.toggleFavorite(id, oldValue) }
+            ) { id ->
                 navController.navigate("restaurants/$id")
             }
         }
@@ -56,8 +66,9 @@ private fun RestaurantApp() {
                 uriPattern = "www.restaurantapp.details.com/{restaurant_id}"
             })
         ) { navStackEntry ->
+            val viewModel: RestaurantDetailViewModel = viewModel()
             val id = navStackEntry.arguments?.getInt("restaurant_id")
-            RestaurantDetailScreen()
+            RestaurantDetailScreen(viewModel.state.value)
         }
     }
 }

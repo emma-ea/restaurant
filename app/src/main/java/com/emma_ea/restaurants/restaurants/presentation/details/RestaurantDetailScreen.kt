@@ -13,13 +13,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantDetails
 import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantIcon
+import com.emma_ea.restaurants.restaurants.presentation.list.RestaurantScreenState
 
 @Composable
-fun RestaurantDetailScreen() {
-    val vm: RestaurantDetailViewModel = viewModel()
-    val item = vm.state.value
+fun RestaurantDetailScreen(
+    state: RestaurantDetailScreenState
+) {
 
-    if (item != null) {
+    if (state.data != null) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -31,8 +32,8 @@ fun RestaurantDetailScreen() {
                 modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
             )
             RestaurantDetails(
-                title = item.title,
-                description = item.description,
+                title = state.data.title,
+                description = state.data.description,
                 modifier = Modifier.padding(bottom = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             )

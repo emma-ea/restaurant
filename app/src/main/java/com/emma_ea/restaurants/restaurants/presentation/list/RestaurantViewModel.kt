@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emma_ea.restaurants.restaurants.data.RestaurantRepository
 import com.emma_ea.restaurants.restaurants.domain.GetInitialRestaurantsUseCase
 import com.emma_ea.restaurants.restaurants.domain.ToggleRestaurantUseCase
 import kotlinx.coroutines.*
@@ -14,9 +13,9 @@ class RestaurantViewModel() : ViewModel() {
     private val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase()
     private val getToggleRestaurantUseCase = ToggleRestaurantUseCase()
 
-    private val _state = mutableStateOf(RestaurantViewState())
+    private val _state = mutableStateOf(RestaurantScreenState())
 
-    val state: State<RestaurantViewState> = _state
+    val state: State<RestaurantScreenState> = _state
 
     private val errorHandler = CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
