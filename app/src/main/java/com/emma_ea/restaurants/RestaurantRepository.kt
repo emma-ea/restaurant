@@ -23,35 +23,64 @@ class RestaurantRepository {
     private suspend fun refreshCache() {
         val remoteRestaurants = restInterface.getRestaurants()
         val favoriteRestaurants = restaurantsDao.getAllFavorited()
-        restaurantsDao.addAll(remoteRestaurants)
-        restaurantsDao.updateAll(favoriteRestaurants.map { PartialRestaurant(it.id, true) })
+        restaurantsDao.addAll(remoteRestaurants.map {
+            LocalRestaurant(
+                it.id,
+                it.title,
+                it.description,
+                false,
+            )
+        })
+        restaurantsDao.updateAll(favoriteRestaurants.map { PartialLocalRestaurant(it.id, true) })
     }
 
-    suspend fun getAllRestaurants(): List<Restaurant> {
-        return withContext(Dispatchers.IO) {
+    suspend fun loadRestaurants() {
+        withContext(Dispatchers.IO) {
             try {
                 refreshCache()
             } catch (e: Exception) {
                 handleException(e)
             }
+        }
+    }
+
+    suspend fun getRestaurants(): List<Restaurant> {
+        return withContext(Dispatchers.IO) {
             return@withContext restaurantsDao.getAll()
+                .map {
+                    Restaurant(it.id, it.title, it.description, it.isFavorite)
+                }
         }
     }
 
     suspend fun getRestaurantById(id: Int): Restaurant {
         return withContext(Dispatchers.IO) {
             try {
-                restaurantsDao.getRestaurantById(id)
+                restaurantsDao.getRestaurantById(id).let {
+                    Restaurant(it.id, it.title, it.description)
+                }
             } catch (e: Exception) {
                 throw e
             }
         }
     }
 
-    suspend fun toggleFavoriteRestaurant(id: Int, oldValue: Boolean) =
+    suspend fun getRemoteRestaurantById(id: Int): Restaurant {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = restInterface.getRestaurant(id)
+                response.values.first().let {
+                    Restaurant(it.id, it.title, it.description)
+                }
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
+    suspend fun toggleFavoriteRestaurant(id: Int, value: Boolean) =
         withContext(Dispatchers.IO) {
-            restaurantsDao.update(PartialRestaurant(id = id, isFavorite = !oldValue))
-            restaurantsDao.getAll()
+            restaurantsDao.update(PartialLocalRestaurant(id = id, isFavorite = value))
         }
 
     private suspend fun handleException(e: Exception) {
