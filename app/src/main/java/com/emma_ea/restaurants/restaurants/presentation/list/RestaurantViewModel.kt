@@ -6,12 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emma_ea.restaurants.restaurants.domain.GetInitialRestaurantsUseCase
 import com.emma_ea.restaurants.restaurants.domain.ToggleRestaurantUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
-class RestaurantViewModel() : ViewModel() {
-
-    private val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase()
-    private val getToggleRestaurantUseCase = ToggleRestaurantUseCase()
+@HiltViewModel
+class RestaurantViewModel @Inject constructor(
+    private val getInitialRestaurantsUseCase: GetInitialRestaurantsUseCase,
+    private val getToggleRestaurantUseCase: ToggleRestaurantUseCase
+) : ViewModel() {
 
     private val _state = mutableStateOf(RestaurantScreenState())
 

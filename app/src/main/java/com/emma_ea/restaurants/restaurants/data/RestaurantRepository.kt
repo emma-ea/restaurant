@@ -5,6 +5,7 @@ import com.emma_ea.restaurants.RestaurantsApplication
 import com.emma_ea.restaurants.restaurants.data.local.LocalRestaurant
 import com.emma_ea.restaurants.restaurants.data.local.PartialLocalRestaurant
 import com.emma_ea.restaurants.restaurants.data.local.RestaurantDatabase
+import com.emma_ea.restaurants.restaurants.data.local.RestaurantsDao
 import com.emma_ea.restaurants.restaurants.data.remote.RestaurantApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,18 +14,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.ConnectException
 import java.net.UnknownHostException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RestaurantRepository {
-
-    private var restInterface: RestaurantApiService =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl("https://wonder-words-9f366-default-rtdb.firebaseio.com/")
-            .build()
-            .create(RestaurantApiService::class.java)
-
-    private var restaurantsDao = RestaurantDatabase
-        .getDaoIntance(RestaurantsApplication.getAppContext())
+@Singleton
+class RestaurantRepository @Inject constructor(
+    private val restInterface: RestaurantApiService,
+    private val restaurantsDao: RestaurantsDao
+) {
 
     private suspend fun refreshCache() {
         val remoteRestaurants = restInterface.getRestaurants()
