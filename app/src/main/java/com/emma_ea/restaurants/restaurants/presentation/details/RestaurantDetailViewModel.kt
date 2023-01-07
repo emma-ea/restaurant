@@ -17,8 +17,8 @@ class RestaurantDetailViewModel(
 
     private val getRestaurantByIDUseCase = GetRestaurantByIDUseCase()
 
-    val _state = mutableStateOf<Restaurant?>(null)
-    val state: State<Restaurant?> = _state
+    private val _state = mutableStateOf(RestaurantDetailScreenState())
+    val state: State<RestaurantDetailScreenState> = _state
 
     private val errorHandler = CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
@@ -29,7 +29,7 @@ class RestaurantDetailViewModel(
 
         viewModelScope.launch(errorHandler) {
             val restaurant = getRemoteRestaurant(id)
-            _state.value = restaurant
+            _state.value = _state.value.copy(data = restaurant)
         }
     }
 

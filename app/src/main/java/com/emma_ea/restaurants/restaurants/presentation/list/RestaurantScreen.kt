@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.emma_ea.restaurants.restaurants.domain.Restaurant
 import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 
@@ -28,14 +27,23 @@ import com.emma_ea.restaurants.ui.theme.RestaurantsTheme
 @Composable
 fun RestaurantPreview() {
     RestaurantsTheme {
-        //RestaurantScreen()
+        RestaurantScreen(
+            RestaurantScreenState(),
+            {},
+            {_, _ -> },
+            {}
+        )
     }
 }
 
 @Composable
-fun RestaurantScreen(onItemClick: (id: Int) -> Unit) {
-    val vm = viewModel<RestaurantViewModel>()
-    val state = vm.state.value
+fun RestaurantScreen(
+    state: RestaurantScreenState,
+    requestData: () -> Unit,
+    onFavoriteClick: (id: Int, oldValue: Boolean) -> Unit,
+    onItemClick: (id: Int) -> Unit
+) {
+
 
     if (state.loading) {
         Box(
@@ -54,7 +62,7 @@ fun RestaurantScreen(onItemClick: (id: Int) -> Unit) {
         ) {
             Text(state.error)
             Spacer(modifier = Modifier.height(10.dp))
-            Button(onClick = { vm.retry() }) {
+            Button(onClick = { requestData() }) {
                 Text("Retry")
             }
         }
@@ -64,7 +72,7 @@ fun RestaurantScreen(onItemClick: (id: Int) -> Unit) {
             items(state.data) { restaurant ->
                 RestaurantItem(
                     item = restaurant,
-                    onFavoriteClick =  { id, oldValue -> vm.toggleFavorite(id, oldValue) },
+                    onFavoriteClick =  { id, oldValue -> onFavoriteClick(id, oldValue) },
                     onItemClick = {id -> onItemClick(id) }
                 )
             }
