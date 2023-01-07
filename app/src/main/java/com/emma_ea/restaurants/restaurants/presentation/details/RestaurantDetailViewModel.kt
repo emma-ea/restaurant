@@ -8,14 +8,16 @@ import androidx.lifecycle.viewModelScope
 import com.emma_ea.restaurants.restaurants.data.RestaurantRepository
 import com.emma_ea.restaurants.restaurants.domain.GetRestaurantByIDUseCase
 import com.emma_ea.restaurants.restaurants.domain.Restaurant
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RestaurantDetailViewModel(
-    private val stateHandler: SavedStateHandle
+@HiltViewModel
+class RestaurantDetailViewModel @Inject constructor(
+    stateHandler: SavedStateHandle,
+    private val getRestaurantByIDUseCase: GetRestaurantByIDUseCase
 )  : ViewModel() {
-
-    private val getRestaurantByIDUseCase = GetRestaurantByIDUseCase()
 
     private val _state = mutableStateOf(RestaurantDetailScreenState())
     val state: State<RestaurantDetailScreenState> = _state
