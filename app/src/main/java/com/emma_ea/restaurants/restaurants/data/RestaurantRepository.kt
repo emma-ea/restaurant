@@ -2,11 +2,13 @@ package com.emma_ea.restaurants.restaurants.data
 
 import com.emma_ea.restaurants.restaurants.domain.Restaurant
 import com.emma_ea.restaurants.RestaurantsApplication
+import com.emma_ea.restaurants.restaurants.data.di.IoDispatcher
 import com.emma_ea.restaurants.restaurants.data.local.LocalRestaurant
 import com.emma_ea.restaurants.restaurants.data.local.PartialLocalRestaurant
 import com.emma_ea.restaurants.restaurants.data.local.RestaurantDatabase
 import com.emma_ea.restaurants.restaurants.data.local.RestaurantsDao
 import com.emma_ea.restaurants.restaurants.data.remote.RestaurantApiService
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -20,7 +22,8 @@ import javax.inject.Singleton
 @Singleton
 class RestaurantRepository @Inject constructor(
     private val restInterface: RestaurantApiService,
-    private val restaurantsDao: RestaurantsDao
+    private val restaurantsDao: RestaurantsDao,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
     private suspend fun refreshCache() {
@@ -38,7 +41,7 @@ class RestaurantRepository @Inject constructor(
     }
 
     suspend fun loadRestaurants() {
-        withContext(Dispatchers.IO) {
+        withContext(dispatcher) {
             try {
                 refreshCache()
             } catch (e: Exception) {
@@ -48,7 +51,7 @@ class RestaurantRepository @Inject constructor(
     }
 
     suspend fun getRestaurants(): List<Restaurant> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             return@withContext restaurantsDao.getAll()
                 .map {
                     Restaurant(it.id, it.title, it.description, it.isFavorite)
@@ -57,7 +60,7 @@ class RestaurantRepository @Inject constructor(
     }
 
     suspend fun getRestaurantById(id: Int): Restaurant {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 restaurantsDao.getRestaurantById(id).let {
                     Restaurant(it.id, it.title, it.description)
@@ -69,7 +72,7 @@ class RestaurantRepository @Inject constructor(
     }
 
     suspend fun getRemoteRestaurantById(id: Int): Restaurant {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val response = restInterface.getRestaurant(id)
                 response.values.first().let {
@@ -82,7 +85,7 @@ class RestaurantRepository @Inject constructor(
     }
 
     suspend fun toggleFavoriteRestaurant(id: Int, value: Boolean) =
-        withContext(Dispatchers.IO) {
+        withContext(dispatcher) {
             restaurantsDao.update(PartialLocalRestaurant(id = id, isFavorite = value))
         }
 
