@@ -5,10 +5,11 @@ import com.emma_ea.restaurants.restaurants.data.remote.RemoteRestaurant
 import com.emma_ea.restaurants.restaurants.data.remote.RestaurantApiService
 import kotlinx.coroutines.delay
 
-class FakeApiService : RestaurantApiService {
+class FakeApiService(private val throwException: Boolean) : RestaurantApiService {
 
     override suspend fun getRestaurants(): List<RemoteRestaurant> {
         delay(1000)
+        if (throwException) throw Exception("test exception")       // manually trigger exception testing error state
         return DummyContent.getRemoteRestaurants()
     }
 

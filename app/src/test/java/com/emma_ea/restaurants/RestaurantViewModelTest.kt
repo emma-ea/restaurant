@@ -18,8 +18,8 @@ class RestaurantViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val scope = TestScope(dispatcher)
 
-    private fun getViewModel(): RestaurantViewModel {
-        val restaurantRepository = RestaurantRepository(FakeApiService(), FakeRoomDao(), dispatcher)
+    private fun getViewModel(throwException: Boolean = false): RestaurantViewModel {
+        val restaurantRepository = RestaurantRepository(FakeApiService(throwException), FakeRoomDao(), dispatcher)
         val  getSortedRestaurantsUseCase = GetSortedRestaurantsUseCase(restaurantRepository)
         val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase(restaurantRepository, getSortedRestaurantsUseCase)
         val getToggleRestaurantUseCase = ToggleRestaurantUseCase(restaurantRepository, getSortedRestaurantsUseCase)
@@ -56,6 +56,15 @@ class RestaurantViewModelTest {
         val restaurants = DummyContent.getDomainResults()
 
         assert(currentState == RestaurantScreenState(data = restaurants, loading = false))
+    }
+
+    @Test
+    fun stateWithErrorContent_isProduced() = scope.runTest {
+        val testVM = getViewModel(throwException = true)
+        advanceUntilIdle()
+        val currentState = testVM.state.value
+
+        assert(currentState == RestaurantScreenState(loading = false, error = "test exception"))
     }
 
 }
